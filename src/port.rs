@@ -64,3 +64,57 @@ pub async fn auto(
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_manual_port_by_name() {
+        let mut ports = vec![];
+        let result = manual_port("/dev/ttyUSB0".to_string(), &mut ports);
+        assert_eq!(result, Some("/dev/ttyUSB0".to_string()));
+
+        let result = manual_port("COM3".to_string(), &mut ports);
+        assert_eq!(result, Some("COM3".to_string()));
+    }
+
+    #[test]
+    fn test_manual_port_by_index_valid() {
+        let mut ports = vec![
+            SerialPortInfo {
+                port_name: "/dev/ttyUSB0".to_string(),
+                port_type: serialport::SerialPortType::Unknown,
+            },
+            SerialPortInfo {
+                port_name: "/dev/ttyUSB1".to_string(),
+                port_type: serialport::SerialPortType::Unknown,
+            },
+        ];
+
+        let result = manual_port("1".to_string(), &mut ports);
+        assert_eq!(result, Some("/dev/ttyUSB1".to_string()));
+        assert_eq!(ports.len(), 1);
+    }
+
+    #[test]
+    fn test_manual_port_by_index_invalid() {
+        let mut ports = vec![
+            SerialPortInfo {
+                port_name: "/dev/ttyUSB0".to_string(),
+                port_type: serialport::SerialPortType::Unknown,
+            },
+        ];
+
+        let result = manual_port("5".to_string(), &mut ports);
+        assert_eq!(result, None);
+        assert_eq!(ports.len(), 1);
+    }
+
+    #[test]
+    fn test_manual_port_invalid_input() {
+        let mut ports = vec![];
+        let result = manual_port("invalid_input".to_string(), &mut ports);
+        assert_eq!(result, None);
+    }
+}

@@ -145,3 +145,54 @@ impl Preferences {
         self.println(&bye);
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_preferences_no_color() {
+        let prefs = Preferences { color_enabled: false };
+        // We can't easily capture stdout without dependencies, but we can call it to ensure it doesn't panic.
+        prefs.print("test print");
+        prefs.println("test println");
+        prefs.logo();
+        prefs.version();
+        prefs.divider();
+        prefs.hint();
+        prefs.connected("/dev/ttyUSB0");
+        // Don't test driver() because it opens a browser and blocks or causes issues in CI
+        prefs.goodbye();
+    }
+
+    #[test]
+    fn test_preferences_with_color() {
+        let prefs = Preferences { color_enabled: true };
+        prefs.print("test print");
+        prefs.println("test println");
+        prefs.logo();
+        prefs.version();
+        prefs.divider();
+        prefs.hint();
+        prefs.connected("/dev/ttyUSB0");
+        prefs.goodbye();
+    }
+
+    #[test]
+    fn test_ports_empty() {
+        let prefs = Preferences { color_enabled: false };
+        prefs.ports(&[]);
+    }
+
+    #[test]
+    fn test_ports_not_empty() {
+        let prefs = Preferences { color_enabled: false };
+        let ports = vec![
+            serialport::SerialPortInfo {
+                port_name: "/dev/ttyUSB0".to_string(),
+                port_type: serialport::SerialPortType::Unknown,
+            }
+        ];
+        prefs.ports(&ports);
+    }
+}

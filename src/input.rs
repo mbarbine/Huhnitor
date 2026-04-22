@@ -48,3 +48,18 @@ pub fn receiver(sender: UnboundedSender<String>) {
 pub async fn read_line(receiver: &mut UnboundedReceiver<String>) -> Option<String> {
     Some(receiver.recv().await?.trim().to_string())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use tokio::sync::mpsc;
+
+    #[tokio::test]
+    async fn test_read_line() {
+        let (sender, mut receiver) = mpsc::unbounded_channel();
+        sender.send("   test input   \n".to_string()).unwrap();
+
+        let result = read_line(&mut receiver).await;
+        assert_eq!(result, Some("test input".to_string()));
+    }
+}
